@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ノジマ作業マニュアル</title>
+<style>
+body { font-family: sans-serif; margin:0; background:#f4f6f8;}
+header { background:#1f2937; color:#fff; padding:15px; text-align:center;}
+main { padding:20px; max-width:800px; margin:auto;}
+.card { background:#fff; padding:15px; border-radius:10px; margin:10px 0;}
+button { padding:10px; margin:5px 0; width:100%;}
+.editor { border:1px solid #ccc; min-height:300px; padding:10px;}
+</style>
+</head>
+
+<body>
+<header>ノジマ作業マニュアル</header>
+
+<main>
+
+<div class="card">
+<h2>業務メニュー</h2>
+
+<button onclick="openWork('repair')">修理受付</button>
+<button onclick="openWork('recycle')">リサイクル受付</button>
+<button onclick="openWork('used')">古物登録</button>
+<button onclick="openWork('todo')">流通便ToDo</button>
+
+</div>
+
+<div class="card">
+<h2 id="title">業務ページ</h2>
+
+<button onclick="unlock()">編集する</button>
+<div id="status"></div>
+
+<div id="editor" class="editor" contenteditable="false"></div>
+
+<input type="file" onchange="addImage(event)">
+<button onclick="save()">保存</button>
+
+</div>
+
+</main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+/* 🔥 あなたのFirebase設定 */
+const firebaseConfig = {
+  apiKey: "AIzaSyCL5M704ccaoVKTfmnoomnILhTolu7litE",
+  authDomain: "todo-8f86e.firebaseapp.com",
+  projectId: "todo-8f86e",
+  storageBucket: "todo-8f86e.firebasestorage.app",
+  messagingSenderId: "530326014165",
+  appId: "1:530326014165:web:18cb248a04058eedd37a5c"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let currentId = "";
+let editable = false;
+const PASSWORD = "1234";
+
+/* 業務開く */
+async function openWork(id){
+  currentId = id;
+  editable = false;
+  document.getElementById("editor").contentEditable = false;
+
+  const snap = await getDoc(doc(db,"works",id));
+
+  if(snap.exists()){
+    document.getElementById("editor").innerHTML = snap.data().html;
+    document.getElementById("title").innerText = snap.data().title;
+  } else {
+    document.getElementById("editor").innerHTML = "<p>未作成</p>";
+    document.getElementById("title").innerText = id;
+  }
+}
+
+/* 編集 */
+function unlock(){
+  const pass = prompt("パスワード");
+  if(pass===PASSWORD){
+    editable = true;
+    document.getElementById("editor").contentEditable = true;
+    document.getElementById("status").innerText="編集モード";
+  } else {
+    alert("違う");
+  }
+}
+
+/* 保存 */
+async function save(){
+  if(!editable) return alert("編集モードにして");
+
+  await setDoc(doc(db,"works",currentId),{
+    title: document.getElementById("title").innerText,
+    html: document.getElementById("editor").innerHTML
+  });
+
+  document.getElementById("status").innerText="保存OK";
+}
+
+/* 画像追加 */
+function addImage(e){
+  if(!editable) return;
+
+  const file = e.target.files[0];
+  const reader = new FileReader();
+
+  reader.onload = function(ev){
+    document.execCommand("insertHTML",false,`<img src="${ev.target.result}" style="max-width:100%">`);
+  }
+
+  reader.readAsDataURL(file);
+}
+
+</script>
+</body>
+</html>
