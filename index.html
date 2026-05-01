@@ -5,12 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ノジマ作業マニュアル</title>
 <style>
-body { font-family: sans-serif; margin:0; background:#f4f6f8;}
-header { background:#1f2937; color:#fff; padding:15px; text-align:center;}
-main { padding:20px; max-width:800px; margin:auto;}
-.card { background:#fff; padding:15px; border-radius:10px; margin:10px 0;}
-button { padding:10px; margin:5px 0; width:100%;}
-.editor { border:1px solid #ccc; min-height:300px; padding:10px;}
+body { font-family: sans-serif; margin:0; background:#f4f6f8; }
+header { background:#1f2937; color:#fff; padding:15px; text-align:center; font-weight:bold; }
+main { padding:20px; max-width:850px; margin:auto; }
+.card { background:#fff; padding:16px; border-radius:12px; margin:12px 0; box-shadow:0 4px 12px rgba(0,0,0,.08); }
+button { padding:12px; margin:6px 0; width:100%; border:0; border-radius:10px; font-size:16px; cursor:pointer; }
+.primary { background:#2563eb; color:white; font-weight:bold; }
+.gray { background:#e5e7eb; }
+.green { background:#16a34a; color:white; font-weight:bold; }
+.yellow { background:#fef3c7; color:#92400e; font-weight:bold; }
+.editor { border:1px solid #ccc; min-height:380px; padding:14px; border-radius:10px; background:#fafafa; line-height:1.7; }
+.editor[contenteditable="true"] { background:white; }
+.editor img { max-width:100%; border-radius:10px; margin:10px 0; display:block; }
+.toolbar { display:none; gap:8px; flex-wrap:wrap; margin:10px 0; }
+.toolbar button, .toolbar label { width:auto; background:#e5e7eb; padding:9px 12px; border-radius:8px; cursor:pointer; }
+.editing .toolbar { display:flex; }
+.status { color:#2563eb; font-size:14px; margin-top:8px; line-height:1.5; }
+.error { color:#b91c1c; font-size:14px; margin-top:8px; line-height:1.5; }
+input[type="text"] { width:100%; padding:12px; font-size:16px; border:1px solid #ccc; border-radius:10px; box-sizing:border-box; }
 </style>
 </head>
 
@@ -18,37 +30,56 @@ button { padding:10px; margin:5px 0; width:100%;}
 <header>ノジマ作業マニュアル</header>
 
 <main>
+  <div class="card">
+    <h2>業務メニュー</h2>
+    <button class="primary" onclick="openWork('repair')">修理受付</button>
+    <button class="primary" onclick="openWork('recycle')">リサイクル受付</button>
+    <button class="primary" onclick="openWork('used')">古物登録</button>
+    <button class="primary" onclick="openWork('todo')">流通便ToDo</button>
+    <div id="firebaseStatus" class="status">Firebase接続確認中...</div>
+  </div>
 
-<div class="card">
-<h2>業務メニュー</h2>
+  <div class="card">
+    <h2 id="title">業務ページ</h2>
 
-<button onclick="openWork('repair')">修理受付</button>
-<button onclick="openWork('recycle')">リサイクル受付</button>
-<button onclick="openWork('used')">古物登録</button>
-<button onclick="openWork('todo')">流通便ToDo</button>
+    <button class="yellow" onclick="unlock()">編集する</button>
+    <button class="gray" onclick="lockEditor()">編集終了</button>
 
-</div>
+    <div id="editArea">
+      <div class="toolbar">
+        <button onclick="formatText('bold')">太字</button>
+        <button onclick="formatText('insertUnorderedList')">箇条書き</button>
+        <button onclick="makeHeading()">見出し</button>
+        <button onclick="insertHr()">区切り線</button>
+        <label>
+          写真追加
+          <input id="imageInput" type="file" accept="image/*" onchange="addImage(event)" hidden>
+        </label>
+      </div>
 
-<div class="card">
-<h2 id="title">業務ページ</h2>
+      <div id="editor" class="editor" contenteditable="false">
+        業務メニューから項目を選んでください。
+      </div>
+    </div>
 
-<button onclick="unlock()">編集する</button>
-<div id="status"></div>
+    <button class="green" onclick="saveWork()">保存</button>
 
-<div id="editor" class="editor" contenteditable="false"></div>
+    <div class="card" style="background:#f9fafb;">
+      <h3>業務を追加</h3>
+      <input id="newWorkName" type="text" placeholder="例：朝礼準備">
+      <button class="primary" onclick="addWork()">業務を追加</button>
+      <div id="extraWorks"></div>
+    </div>
 
-<input type="file" onchange="addImage(event)">
-<button onclick="save()">保存</button>
-
-</div>
-
+    <div id="status" class="status"></div>
+    <div id="error" class="error"></div>
+  </div>
 </main>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 
-/* 🔥 あなたのFirebase設定 */
+<script>
 const firebaseConfig = {
   apiKey: "AIzaSyCL5M704ccaoVKTfmnoomnILhTolu7litE",
   authDomain: "todo-8f86e.firebaseapp.com",
@@ -58,68 +89,234 @@ const firebaseConfig = {
   appId: "1:530326014165:web:18cb248a04058eedd37a5c"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-let currentId = "";
-let editable = false;
 const PASSWORD = "1234";
 
-/* 業務開く */
+const defaultWorks = {
+  repair: { title:"修理受付", html:"<h2>修理受付</h2><p>ここに修理受付の流れを作成してください。</p>" },
+  recycle: { title:"リサイクル受付", html:"<h2>リサイクル受付</h2><p>ここにリサイクル受付の流れを作成してください。</p>" },
+  used: { title:"古物登録", html:"<h2>古物登録</h2><p>ここに古物登録の流れを作成してください。</p>" },
+  todo: { title:"流通便ToDo", html:"<h2>流通便ToDo</h2><p>ここに流通便でやることを作成してください。</p>" }
+};
+
+let db = null;
+let currentId = "";
+let editable = false;
+let extraWorks = [];
+
+const titleEl = document.getElementById("title");
+const editor = document.getElementById("editor");
+const statusBox = document.getElementById("status");
+const errorBox = document.getElementById("error");
+const editArea = document.getElementById("editArea");
+
+window.addEventListener("load", async function() {
+  try {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    document.getElementById("firebaseStatus").innerText = "Firebase接続OK";
+    await loadExtraWorks();
+  } catch(e) {
+    console.error(e);
+    document.getElementById("firebaseStatus").innerText = "Firebase接続エラー：Firestore設定を確認";
+  }
+});
+
 async function openWork(id){
   currentId = id;
   editable = false;
-  document.getElementById("editor").contentEditable = false;
+  editor.contentEditable = "false";
+  editArea.classList.remove("editing");
+  statusBox.innerText = "";
+  errorBox.innerText = "";
 
-  const snap = await getDoc(doc(db,"works",id));
+  const def = defaultWorks[id] || extraWorks.find(w => w.id === id) || {
+    title: id,
+    html: "<p>未作成です。</p>"
+  };
 
-  if(snap.exists()){
-    document.getElementById("editor").innerHTML = snap.data().html;
-    document.getElementById("title").innerText = snap.data().title;
-  } else {
-    document.getElementById("editor").innerHTML = "<p>未作成</p>";
-    document.getElementById("title").innerText = id;
+  titleEl.innerText = def.title;
+  editor.innerHTML = def.html;
+
+  if(!db){
+    errorBox.innerText = "Firebase未接続です。ただし画面操作はできます。";
+    return;
+  }
+
+  try {
+    const snap = await db.collection("works").doc(id).get();
+
+    if(snap.exists){
+      const data = snap.data();
+      titleEl.innerText = data.title || def.title;
+      editor.innerHTML = data.html || def.html;
+    }
+  } catch(e) {
+    console.error(e);
+    errorBox.innerText = "読み込み失敗。Firestoreの作成・ルールを確認してください。";
   }
 }
 
-/* 編集 */
 function unlock(){
-  const pass = prompt("パスワード");
-  if(pass===PASSWORD){
+  const pass = prompt("編集用パスワード");
+  if(pass === PASSWORD){
     editable = true;
-    document.getElementById("editor").contentEditable = true;
-    document.getElementById("status").innerText="編集モード";
-  } else {
-    alert("違う");
+    editor.contentEditable = "true";
+    editArea.classList.add("editing");
+    statusBox.innerText = "編集モードです";
+    editor.focus();
+  } else if(pass !== null) {
+    alert("パスワードが違います");
   }
 }
 
-/* 保存 */
-async function save(){
-  if(!editable) return alert("編集モードにして");
-
-  await setDoc(doc(db,"works",currentId),{
-    title: document.getElementById("title").innerText,
-    html: document.getElementById("editor").innerHTML
-  });
-
-  document.getElementById("status").innerText="保存OK";
+function lockEditor(){
+  editable = false;
+  editor.contentEditable = "false";
+  editArea.classList.remove("editing");
+  statusBox.innerText = "閲覧モードです";
 }
 
-/* 画像追加 */
+async function saveWork(){
+  if(!currentId) return alert("先に業務を選んでください");
+  if(!editable) return alert("編集モードにしてください");
+  if(!db) return alert("Firebase未接続です");
+
+  try {
+    await db.collection("works").doc(currentId).set({
+      title: titleEl.innerText,
+      html: editor.innerHTML,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge:true });
+
+    statusBox.innerText = "保存OK（Firebaseに保存されました）";
+    errorBox.innerText = "";
+  } catch(e) {
+    console.error(e);
+    errorBox.innerText = "保存失敗。Firestoreルールを確認してください。";
+  }
+}
+
+function formatText(command){
+  if(!editable) return alert("編集モードにしてください");
+  document.execCommand(command, false, null);
+  editor.focus();
+}
+
+function makeHeading(){
+  if(!editable) return alert("編集モードにしてください");
+  document.execCommand("formatBlock", false, "h2");
+  editor.focus();
+}
+
+function insertHr(){
+  if(!editable) return alert("編集モードにしてください");
+  document.execCommand("insertHorizontalRule", false, null);
+  editor.focus();
+}
+
 function addImage(e){
-  if(!editable) return;
+  if(!editable) {
+    e.target.value = "";
+    return alert("編集モードにしてください");
+  }
 
   const file = e.target.files[0];
-  const reader = new FileReader();
+  if(!file) return;
 
-  reader.onload = function(ev){
-    document.execCommand("insertHTML",false,`<img src="${ev.target.result}" style="max-width:100%">`);
+  if(file.size > 800 * 1024){
+    alert("画像が大きいです。まずは800KB以下推奨です。");
+    e.target.value = "";
+    return;
   }
 
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    document.execCommand("insertHTML", false, '<img src="' + ev.target.result + '" alt="画像">');
+    editor.focus();
+  };
   reader.readAsDataURL(file);
+  e.target.value = "";
 }
 
+async function addWork(){
+  const pass = prompt("業務追加用パスワード");
+  if(pass !== PASSWORD) return alert("パスワードが違います");
+
+  const input = document.getElementById("newWorkName");
+  const name = input.value.trim();
+  if(!name) return;
+
+  const id = "work_" + Date.now();
+  const newWork = {
+    id: id,
+    title: name,
+    html: "<h2>" + escapeHtml(name) + "</h2><p>ここに内容を作成してください。</p>"
+  };
+
+  extraWorks.push(newWork);
+  renderExtraWorks();
+  input.value = "";
+
+  if(!db){
+    errorBox.innerText = "Firebase未接続なので追加内容は保存されません。";
+    return;
+  }
+
+  try {
+    await db.collection("settings").doc("extraWorks").set({
+      works: extraWorks,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    await db.collection("works").doc(id).set({
+      title: newWork.title,
+      html: newWork.html,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    statusBox.innerText = "業務を追加しました";
+    errorBox.innerText = "";
+  } catch(e) {
+    console.error(e);
+    errorBox.innerText = "業務追加に失敗しました";
+  }
+}
+
+async function loadExtraWorks(){
+  if(!db) return;
+
+  try {
+    const snap = await db.collection("settings").doc("extraWorks").get();
+    extraWorks = snap.exists ? (snap.data().works || []) : [];
+    renderExtraWorks();
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+function renderExtraWorks(){
+  const area = document.getElementById("extraWorks");
+  area.innerHTML = "";
+  extraWorks.forEach(function(work){
+    const btn = document.createElement("button");
+    btn.className = "primary";
+    btn.textContent = work.title;
+    btn.onclick = function(){ openWork(work.id); };
+    area.appendChild(btn);
+  });
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, function(s){
+    return {
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#039;"
+    }[s];
+  });
+}
 </script>
 </body>
 </html>
