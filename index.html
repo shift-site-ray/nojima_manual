@@ -5,81 +5,354 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ノジマ作業マニュアル</title>
 <style>
-body { font-family: sans-serif; margin:0; background:#f4f6f8; }
-header { background:#1f2937; color:#fff; padding:15px; text-align:center; font-weight:bold; }
-main { padding:20px; max-width:850px; margin:auto; }
-.card { background:#fff; padding:16px; border-radius:12px; margin:12px 0; box-shadow:0 4px 12px rgba(0,0,0,.08); }
-button { padding:12px; margin:6px 0; width:100%; border:0; border-radius:10px; font-size:16px; cursor:pointer; }
-.primary { background:#2563eb; color:white; font-weight:bold; }
-.gray { background:#e5e7eb; }
-.green { background:#16a34a; color:white; font-weight:bold; }
-.yellow { background:#fef3c7; color:#92400e; font-weight:bold; }
-.editor { border:1px solid #ccc; min-height:380px; padding:14px; border-radius:10px; background:#fafafa; line-height:1.7; }
-.editor[contenteditable="true"] { background:white; }
-.editor img { max-width:100%; border-radius:10px; margin:10px 0; display:block; }
-.toolbar { display:none; gap:8px; flex-wrap:wrap; margin:10px 0; }
-.toolbar button, .toolbar label { width:auto; background:#e5e7eb; padding:9px 12px; border-radius:8px; cursor:pointer; }
-.editing .toolbar { display:flex; }
-.status { color:#2563eb; font-size:14px; margin-top:8px; line-height:1.5; }
-.error { color:#b91c1c; font-size:14px; margin-top:8px; line-height:1.5; }
-input[type="text"] { width:100%; padding:12px; font-size:16px; border:1px solid #ccc; border-radius:10px; box-sizing:border-box; }
+:root{
+  --bg:#f5f7fb;
+  --panel:#ffffff;
+  --ink:#172033;
+  --muted:#667085;
+  --line:#e6eaf2;
+  --brand:#2563eb;
+  --brand2:#06b6d4;
+  --good:#16a34a;
+  --warn:#f59e0b;
+  --danger:#dc2626;
+  --shadow:0 18px 45px rgba(23,32,51,.08);
+  --radius:22px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(circle at top left, rgba(37,99,235,.16), transparent 34%),
+    radial-gradient(circle at top right, rgba(6,182,212,.18), transparent 32%),
+    var(--bg);
+}
+header{
+  position:sticky;
+  top:0;
+  z-index:10;
+  backdrop-filter: blur(16px);
+  background:rgba(255,255,255,.82);
+  border-bottom:1px solid rgba(230,234,242,.9);
+}
+.header-inner{
+  max-width:1120px;
+  margin:auto;
+  padding:16px 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.logo{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-weight:900;
+  letter-spacing:.02em;
+}
+.logo-mark{
+  width:38px;height:38px;border-radius:13px;
+  display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--brand),var(--brand2));
+  color:white;
+  box-shadow:0 10px 24px rgba(37,99,235,.25);
+}
+.pill{
+  font-size:12px;
+  color:#0f766e;
+  background:#ccfbf1;
+  padding:7px 10px;
+  border-radius:999px;
+  white-space:nowrap;
+}
+main{
+  max-width:1120px;
+  margin:auto;
+  padding:22px 18px 48px;
+}
+.hero{
+  background:linear-gradient(135deg,#172033,#1e3a8a 55%,#0891b2);
+  color:white;
+  border-radius:28px;
+  padding:26px;
+  box-shadow:var(--shadow);
+  margin-bottom:18px;
+}
+.hero h1{margin:0 0 8px;font-size:30px}
+.hero p{margin:0;color:rgba(255,255,255,.82);line-height:1.7}
+.grid{
+  display:grid;
+  grid-template-columns:340px 1fr;
+  gap:18px;
+  align-items:start;
+}
+.card{
+  background:rgba(255,255,255,.94);
+  border:1px solid rgba(230,234,242,.9);
+  border-radius:var(--radius);
+  padding:18px;
+  box-shadow:var(--shadow);
+}
+.card h2,.card h3{margin:0 0 12px}
+.small{font-size:13px;color:var(--muted);line-height:1.6}
+.status{
+  font-size:13px;
+  margin-top:10px;
+  line-height:1.5;
+  padding:11px 12px;
+  border-radius:14px;
+  background:#eef2ff;
+  color:#1e40af;
+  border:1px solid #dbeafe;
+}
+.ok{background:#dcfce7;color:#166534;border-color:#bbf7d0}
+.warn{background:#fef3c7;color:#92400e;border-color:#fde68a}
+.ng{background:#fee2e2;color:#991b1b;border-color:#fecaca}
+button{
+  border:0;
+  border-radius:15px;
+  font-size:15px;
+  cursor:pointer;
+  transition:.16s transform,.16s box-shadow,.16s opacity;
+}
+button:active{transform:scale(.985)}
+.btn{
+  width:100%;
+  padding:13px 14px;
+  font-weight:800;
+}
+.primary{
+  background:linear-gradient(135deg,var(--brand),#1d4ed8);
+  color:white;
+  box-shadow:0 10px 24px rgba(37,99,235,.22);
+}
+.gray{background:#eef2f7;color:#344054}
+.green{background:linear-gradient(135deg,#16a34a,#059669);color:white}
+.yellow{background:#fff7d6;color:#92400e}
+.red{background:#fee2e2;color:#991b1b}
+.menu-list{display:flex;flex-direction:column;gap:10px}
+.menu-row{
+  display:grid;
+  grid-template-columns:1fr auto auto;
+  gap:8px;
+  align-items:center;
+}
+.menu-main{
+  text-align:left;
+  padding:14px 14px;
+  border-radius:17px;
+  background:white;
+  border:1px solid var(--line);
+  box-shadow:0 8px 20px rgba(23,32,51,.05);
+}
+.menu-main strong{display:block;font-size:15px}
+.menu-main span{display:block;font-size:12px;color:var(--muted);margin-top:4px}
+.icon-btn{
+  width:56px;
+  height:48px;
+  border-radius:15px;
+  background:#f1f5f9;
+  color:#334155;
+  font-size:13px;
+  font-weight:800;
+}
+.icon-btn.delete{background:#fff1f2;color:#be123c}
+input[type="text"]{
+  width:100%;
+  padding:13px 14px;
+  font-size:16px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  outline:none;
+  background:#fbfdff;
+}
+input[type="text"]:focus{border-color:var(--brand);box-shadow:0 0 0 4px rgba(37,99,235,.12)}
+.editor-head{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:flex-start;
+  margin-bottom:14px;
+}
+.title-box h2{margin:0 0 6px;font-size:24px}
+.meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  color:var(--muted);
+  font-size:12px;
+}
+.meta span{
+  background:#f8fafc;
+  border:1px solid var(--line);
+  padding:7px 9px;
+  border-radius:999px;
+}
+.toolbar{
+  display:none;
+  gap:8px;
+  flex-wrap:wrap;
+  margin:12px 0;
+  padding:12px;
+  border-radius:18px;
+  background:#f8fafc;
+  border:1px solid var(--line);
+}
+.editing .toolbar{display:flex}
+.toolbar button,.toolbar label{
+  width:auto;
+  background:white;
+  border:1px solid var(--line);
+  padding:9px 12px;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:700;
+  color:#344054;
+}
+input[type="color"]{width:42px;height:34px;border:0;background:transparent;vertical-align:middle}
+.editor{
+  border:1px solid var(--line);
+  min-height:480px;
+  padding:20px;
+  border-radius:20px;
+  background:#fbfdff;
+  line-height:1.8;
+  overflow-wrap:break-word;
+  outline:none;
+}
+.editor[contenteditable="true"]{
+  background:white;
+  border:2px solid var(--brand);
+  box-shadow:0 0 0 5px rgba(37,99,235,.10);
+}
+.editor img,.editor video{
+  max-width:100%;
+  border-radius:14px;
+  margin:12px 0;
+  display:block;
+  box-shadow:0 10px 24px rgba(23,32,51,.10);
+}
+.actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.add-box{
+  display:grid;
+  gap:10px;
+}
+@media(max-width:860px){
+  .grid{grid-template-columns:1fr}
+  .hero h1{font-size:25px}
+  .header-inner{align-items:flex-start;flex-direction:column}
+  .editor-head{flex-direction:column}
+  .actions{grid-template-columns:1fr}
+}
 </style>
 </head>
 
 <body>
-<header>ノジマ作業マニュアル</header>
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-mark">N</div>
+      <div>
+        <div>ノジマ作業マニュアル</div>
+        <div class="small">Operation Manual</div>
+      </div>
+    </div>
+    <div class="pill">店舗業務ナレッジ共有</div>
+  </div>
+</header>
 
 <main>
-  <div class="card">
-    <h2>業務メニュー</h2>
-    <button class="primary" onclick="openWork('repair')">修理受付</button>
-    <button class="primary" onclick="openWork('recycle')">リサイクル受付</button>
-    <button class="primary" onclick="openWork('used')">古物登録</button>
-    <button class="primary" onclick="openWork('todo')">流通便ToDo</button>
-    <div id="firebaseStatus" class="status">Firebase接続確認中...</div>
-  </div>
+  <section class="hero">
+    <h1>業務を、見やすく・迷わず・更新しやすく。</h1>
+    <p>業務メニューから手順を開き、必要な情報を写真・動画付きで管理できます。</p>
+  </section>
 
-  <div class="card">
-    <h2 id="title">業務ページ</h2>
-
-    <button class="yellow" onclick="unlock()">編集する</button>
-    <button class="gray" onclick="lockEditor()">編集終了</button>
-
-    <div id="editArea">
-      <div class="toolbar">
-        <button onclick="formatText('bold')">太字</button>
-        <button onclick="formatText('insertUnorderedList')">箇条書き</button>
-        <button onclick="makeHeading()">見出し</button>
-        <button onclick="insertHr()">区切り線</button>
-        <label>
-          写真追加
-          <input id="imageInput" type="file" accept="image/*" onchange="addImage(event)" hidden>
-        </label>
+  <div class="grid">
+    <aside>
+      <div class="card">
+        <h2>業務メニュー</h2>
+        <p class="small">追加した業務もこの一覧に統合されます。名前変更・削除はパスワードが必要です。</p>
+        <div id="menuList" class="menu-list"></div>
       </div>
 
-      <div id="editor" class="editor" contenteditable="false">
-        業務メニューから項目を選んでください。
+      <div class="card">
+        <h3>業務を追加</h3>
+        <div class="add-box">
+          <input id="newWorkName" type="text" placeholder="例：朝礼準備">
+          <button class="btn primary" onclick="addWork()">＋ 業務を追加</button>
+        </div>
       </div>
-    </div>
 
-    <button class="green" onclick="saveWork()">保存</button>
+      <div class="card">
+        <h3>接続状態</h3>
+        <div id="jsStatus" class="status ng">JavaScript未起動</div>
+        <div id="firebaseStatus" class="status warn">Firebase未確認</div>
+      </div>
+    </aside>
 
-    <div class="card" style="background:#f9fafb;">
-      <h3>業務を追加</h3>
-      <input id="newWorkName" type="text" placeholder="例：朝礼準備">
-      <button class="primary" onclick="addWork()">業務を追加</button>
-      <div id="extraWorks"></div>
-    </div>
+    <section class="card">
+      <div class="editor-head">
+        <div class="title-box">
+          <h2 id="title">業務ページ</h2>
+          <div class="meta">
+            <span id="lastUpdated">最終更新日：未保存</span>
+            <span id="lastEditor">最終更新者：未入力</span>
+          </div>
+        </div>
+      </div>
 
-    <div id="status" class="status"></div>
-    <div id="error" class="error"></div>
+      <div class="actions">
+        <button class="btn yellow" onclick="unlock()">編集する</button>
+        <button class="btn gray" onclick="lockEditor()">編集終了</button>
+      </div>
+
+      <div id="editArea">
+        <div class="toolbar">
+          <button onclick="formatText('bold')">太字</button>
+          <button onclick="formatText('insertUnorderedList')">箇条書き</button>
+          <button onclick="formatText('insertOrderedList')">番号</button>
+          <button onclick="makeHeading()">見出し</button>
+          <button onclick="insertHr()">区切り線</button>
+
+          <label>文字色
+            <input id="colorInput" type="color" value="#172033" onchange="changeTextColor(this.value)">
+          </label>
+
+          <label>画像追加
+            <input id="imageInput" type="file" accept="image/*" onchange="uploadMedia(event,'image')" hidden>
+          </label>
+
+          <label>動画追加
+            <input id="videoInput" type="file" accept="video/*" onchange="uploadMedia(event,'video')" hidden>
+          </label>
+        </div>
+
+        <div id="editor" class="editor" contenteditable="false">
+          業務メニューから項目を選んでください。
+        </div>
+      </div>
+
+      <div class="card" style="box-shadow:none;background:#f8fafc;margin-top:14px;">
+        <h3>保存情報</h3>
+        <input id="editorNameInput" type="text" placeholder="更新者名 任意 例：小田嶋">
+        <button class="btn green" onclick="saveWork()">保存する</button>
+        <div id="saveStatus" class="status warn">保存状態：まだ保存していません</div>
+      </div>
+    </section>
   </div>
 </main>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-
 <script>
+document.getElementById("jsStatus").innerText = "JavaScript起動OK";
+document.getElementById("jsStatus").className = "status ok";
+
 const firebaseConfig = {
   apiKey: "AIzaSyCL5M704ccaoVKTfmnoomnILhTolu7litE",
   authDomain: "todo-8f86e.firebaseapp.com",
@@ -91,68 +364,161 @@ const firebaseConfig = {
 
 const PASSWORD = "1234";
 
-const defaultWorks = {
-  repair: { title:"修理受付", html:"<h2>修理受付</h2><p>ここに修理受付の流れを作成してください。</p>" },
-  recycle: { title:"リサイクル受付", html:"<h2>リサイクル受付</h2><p>ここにリサイクル受付の流れを作成してください。</p>" },
-  used: { title:"古物登録", html:"<h2>古物登録</h2><p>ここに古物登録の流れを作成してください。</p>" },
-  todo: { title:"流通便ToDo", html:"<h2>流通便ToDo</h2><p>ここに流通便でやることを作成してください。</p>" }
-};
+const initialWorks = [
+  { id:"repair", title:"修理受付", html:"<h2>修理受付</h2><p>ここに修理受付の流れを作成してください。</p>" },
+  { id:"recycle", title:"リサイクル受付", html:"<h2>リサイクル受付</h2><p>ここにリサイクル受付の流れを作成してください。</p>" },
+  { id:"used", title:"古物登録", html:"<h2>古物登録</h2><p>ここに古物登録の流れを作成してください。</p>" },
+  { id:"todo", title:"流通便ToDo", html:"<h2>流通便ToDo</h2><p>ここに流通便でやることを作成してください。</p>" }
+];
 
 let db = null;
+let storage = null;
 let currentId = "";
 let editable = false;
-let extraWorks = [];
+let works = initialWorks.slice();
 
 const titleEl = document.getElementById("title");
 const editor = document.getElementById("editor");
-const statusBox = document.getElementById("status");
-const errorBox = document.getElementById("error");
+const saveStatus = document.getElementById("saveStatus");
+const firebaseStatus = document.getElementById("firebaseStatus");
 const editArea = document.getElementById("editArea");
+const lastUpdated = document.getElementById("lastUpdated");
+const lastEditor = document.getElementById("lastEditor");
+const editorNameInput = document.getElementById("editorNameInput");
 
-window.addEventListener("load", async function() {
-  try {
+function setStatus(el,text,type){
+  el.innerText = text;
+  el.className = "status " + type;
+}
+
+function setMeta(updatedAtText, updatedBy){
+  lastUpdated.innerText = "最終更新日：" + (updatedAtText || "未保存");
+  lastEditor.innerText = "最終更新者：" + (updatedBy || "未入力");
+}
+
+function loadScript(src,onload,onerror){
+  const s=document.createElement("script");
+  s.src=src;
+  s.onload=onload;
+  s.onerror=onerror;
+  document.head.appendChild(s);
+}
+
+renderMenu();
+
+loadScript("https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js", function(){
+  loadScript("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js", function(){
+    loadScript("https://www.gstatic.com/firebasejs/10.12.5/firebase-storage-compat.js", initFirebase, function(){
+      setStatus(firebaseStatus,"Storage SDK読み込み失敗。画像・動画保存不可","ng");
+    });
+  }, function(){
+    setStatus(firebaseStatus,"Firestore SDK読み込み失敗。でも画面操作は可能","ng");
+  });
+}, function(){
+  setStatus(firebaseStatus,"Firebase SDK読み込み失敗。でも画面操作は可能","ng");
+});
+
+async function initFirebase(){
+  try{
+    setStatus(firebaseStatus,"Firebase接続中...","warn");
     firebase.initializeApp(firebaseConfig);
     db = firebase.firestore();
-    document.getElementById("firebaseStatus").innerText = "Firebase接続OK";
-    await loadExtraWorks();
-  } catch(e) {
+    storage = firebase.storage();
+    await db.collection("connectionTest").doc("status").get();
+    setStatus(firebaseStatus,"Firebase接続OK：Firestore/Storage使用可能","ok");
+    await loadWorks();
+  }catch(e){
     console.error(e);
-    document.getElementById("firebaseStatus").innerText = "Firebase接続エラー：Firestore設定を確認";
+    setStatus(firebaseStatus,"Firebase接続エラー：Firestore/Storage作成・ルール確認","ng");
   }
-});
+}
+
+async function loadWorks(){
+  if(!db) return;
+  try{
+    const snap = await db.collection("settings").doc("worksIndex").get();
+    if(snap.exists && Array.isArray(snap.data().works)){
+      works = snap.data().works;
+    }else{
+      works = initialWorks.slice();
+      await saveWorksIndex();
+    }
+    renderMenu();
+  }catch(e){
+    console.error(e);
+    setStatus(saveStatus,"業務メニュー読み込み失敗：Firestoreルール確認","ng");
+  }
+}
+
+async function saveWorksIndex(){
+  if(!db) return;
+  await db.collection("settings").doc("worksIndex").set({
+    works: works,
+    updatedAtText: new Date().toLocaleString("ja-JP"),
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+}
+
+function renderMenu(){
+  const menuList = document.getElementById("menuList");
+  menuList.innerHTML = "";
+  works.forEach(function(work){
+    const row = document.createElement("div");
+    row.className = "menu-row";
+
+    const openBtn = document.createElement("button");
+    openBtn.className = "menu-main";
+    openBtn.innerHTML = "<strong>" + escapeHtml(work.title) + "</strong><span>マニュアルを開く</span>";
+    openBtn.onclick = function(){ openWork(work.id); };
+
+    const renameBtn = document.createElement("button");
+    renameBtn.className = "icon-btn";
+    renameBtn.textContent = "変更";
+    renameBtn.onclick = function(){ renameWork(work.id); };
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "icon-btn delete";
+    deleteBtn.textContent = "削除";
+    deleteBtn.onclick = function(){ deleteWork(work.id); };
+
+    row.appendChild(openBtn);
+    row.appendChild(renameBtn);
+    row.appendChild(deleteBtn);
+    menuList.appendChild(row);
+  });
+}
 
 async function openWork(id){
   currentId = id;
   editable = false;
   editor.contentEditable = "false";
   editArea.classList.remove("editing");
-  statusBox.innerText = "";
-  errorBox.innerText = "";
 
-  const def = defaultWorks[id] || extraWorks.find(w => w.id === id) || {
-    title: id,
-    html: "<p>未作成です。</p>"
-  };
-
-  titleEl.innerText = def.title;
-  editor.innerHTML = def.html;
+  const work = works.find(w => w.id === id) || {title:id, html:"<p>未作成です。</p>"};
+  titleEl.innerText = work.title;
+  editor.innerHTML = work.html || "<p>未作成です。</p>";
+  setMeta(work.updatedAtText, work.updatedBy);
+  setStatus(saveStatus,"画面表示OK。Firebase内容を確認中...","warn");
 
   if(!db){
-    errorBox.innerText = "Firebase未接続です。ただし画面操作はできます。";
+    setStatus(saveStatus,"Firebase未接続：表示だけ可能。保存は不可","ng");
     return;
   }
 
-  try {
+  try{
     const snap = await db.collection("works").doc(id).get();
-
     if(snap.exists){
       const data = snap.data();
-      titleEl.innerText = data.title || def.title;
-      editor.innerHTML = data.html || def.html;
+      titleEl.innerText = data.title || work.title;
+      editor.innerHTML = data.html || work.html || "";
+      setMeta(data.updatedAtText, data.updatedBy);
+      setStatus(saveStatus,"Firebaseから読み込み完了","ok");
+    }else{
+      setStatus(saveStatus,"初期表示中：まだFirebaseには未保存","warn");
     }
-  } catch(e) {
+  }catch(e){
     console.error(e);
-    errorBox.innerText = "読み込み失敗。Firestoreの作成・ルールを確認してください。";
+    setStatus(saveStatus,"読み込み失敗：Firestoreルール確認","ng");
   }
 }
 
@@ -162,9 +528,9 @@ function unlock(){
     editable = true;
     editor.contentEditable = "true";
     editArea.classList.add("editing");
-    statusBox.innerText = "編集モードです";
+    setStatus(saveStatus,"編集モード：編集後に更新者名を任意で入れて保存してください","warn");
     editor.focus();
-  } else if(pass !== null) {
+  }else if(pass !== null){
     alert("パスワードが違います");
   }
 }
@@ -173,26 +539,161 @@ function lockEditor(){
   editable = false;
   editor.contentEditable = "false";
   editArea.classList.remove("editing");
-  statusBox.innerText = "閲覧モードです";
+  setStatus(saveStatus,"閲覧モードです","warn");
 }
 
 async function saveWork(){
   if(!currentId) return alert("先に業務を選んでください");
   if(!editable) return alert("編集モードにしてください");
-  if(!db) return alert("Firebase未接続です");
+  if(!db){
+    setStatus(saveStatus,"保存失敗：Firebase未接続","ng");
+    return;
+  }
 
-  try {
+  const updatedAtText = new Date().toLocaleString("ja-JP");
+  const updatedBy = editorNameInput.value.trim() || "未入力";
+
+  setStatus(saveStatus,"保存中...","warn");
+
+  try{
     await db.collection("works").doc(currentId).set({
       title: titleEl.innerText,
       html: editor.innerHTML,
+      updatedBy: updatedBy,
+      updatedAtText: updatedAtText,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    }, { merge:true });
+    }, {merge:true});
 
-    statusBox.innerText = "保存OK（Firebaseに保存されました）";
-    errorBox.innerText = "";
-  } catch(e) {
+    const idx = works.findIndex(w => w.id === currentId);
+    if(idx >= 0){
+      works[idx].title = titleEl.innerText;
+      works[idx].html = editor.innerHTML;
+      works[idx].updatedBy = updatedBy;
+      works[idx].updatedAtText = updatedAtText;
+      await saveWorksIndex();
+      renderMenu();
+    }
+
+    setMeta(updatedAtText, updatedBy);
+    setStatus(saveStatus,"保存完了：Firebase反映済み","ok");
+  }catch(e){
     console.error(e);
-    errorBox.innerText = "保存失敗。Firestoreルールを確認してください。";
+    setStatus(saveStatus,"保存失敗：" + (e.message || "Firestoreルール確認"),"ng");
+  }
+}
+
+async function addWork(){
+  const pass = prompt("業務追加用パスワード");
+  if(pass !== PASSWORD) return alert("パスワードが違います");
+
+  const input = document.getElementById("newWorkName");
+  const name = input.value.trim();
+  if(!name) return;
+
+  const updatedAtText = new Date().toLocaleString("ja-JP");
+  const id = "work_" + Date.now();
+  const newWork = {
+    id:id,
+    title:name,
+    html:"<h2>" + escapeHtml(name) + "</h2><p>ここに内容を作成してください。</p>",
+    updatedAtText: updatedAtText,
+    updatedBy: "未入力"
+  };
+
+  works.push(newWork);
+  renderMenu();
+  input.value = "";
+
+  if(!db){
+    setStatus(saveStatus,"Firebase未接続：追加は画面だけ反映","ng");
+    return;
+  }
+
+  try{
+    await db.collection("works").doc(id).set({
+      title:newWork.title,
+      html:newWork.html,
+      updatedBy:newWork.updatedBy,
+      updatedAtText:newWork.updatedAtText,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    await saveWorksIndex();
+    setStatus(saveStatus,"業務追加完了：業務メニューに追加済み","ok");
+  }catch(e){
+    console.error(e);
+    setStatus(saveStatus,"業務追加失敗：" + (e.message || "Firestoreルール確認"),"ng");
+  }
+}
+
+async function renameWork(id){
+  const pass = prompt("名前変更用パスワード");
+  if(pass !== PASSWORD) return alert("パスワードが違います");
+
+  const work = works.find(w => w.id === id);
+  if(!work) return;
+
+  const newName = prompt("新しい業務名", work.title);
+  if(!newName || !newName.trim()) return;
+
+  work.title = newName.trim();
+  const updatedAtText = new Date().toLocaleString("ja-JP");
+  work.updatedAtText = updatedAtText;
+  renderMenu();
+
+  if(currentId === id){
+    titleEl.innerText = work.title;
+    setMeta(updatedAtText, work.updatedBy);
+  }
+
+  if(!db){
+    setStatus(saveStatus,"Firebase未接続：名前変更は画面だけ反映","ng");
+    return;
+  }
+
+  try{
+    await saveWorksIndex();
+    await db.collection("works").doc(id).set({
+      title: work.title,
+      updatedAtText: updatedAtText,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, {merge:true});
+    setStatus(saveStatus,"業務名を変更しました：Firebase保存済み","ok");
+  }catch(e){
+    console.error(e);
+    setStatus(saveStatus,"名前変更失敗：" + (e.message || "Firestoreルール確認"),"ng");
+  }
+}
+
+async function deleteWork(id){
+  const pass = prompt("削除用パスワード");
+  if(pass !== PASSWORD) return alert("パスワードが違います");
+
+  const work = works.find(w => w.id === id);
+  if(!work) return;
+  if(!confirm("「" + work.title + "」を削除しますか？")) return;
+
+  works = works.filter(w => w.id !== id);
+  renderMenu();
+
+  if(currentId === id){
+    currentId = "";
+    titleEl.innerText = "業務ページ";
+    editor.innerHTML = "業務メニューから項目を選んでください。";
+    setMeta("", "");
+  }
+
+  if(!db){
+    setStatus(saveStatus,"Firebase未接続：削除は画面だけ反映","ng");
+    return;
+  }
+
+  try{
+    await db.collection("works").doc(id).delete();
+    await saveWorksIndex();
+    setStatus(saveStatus,"業務を削除しました：Firebase反映済み","ok");
+  }catch(e){
+    console.error(e);
+    setStatus(saveStatus,"削除失敗：" + (e.message || "Firestoreルール確認"),"ng");
   }
 }
 
@@ -214,107 +715,60 @@ function insertHr(){
   editor.focus();
 }
 
-function addImage(e){
-  if(!editable) {
+function changeTextColor(color){
+  if(!editable) return alert("編集モードにしてください");
+  document.execCommand("foreColor", false, color);
+  editor.focus();
+}
+
+async function uploadMedia(e,type){
+  if(!editable){
     e.target.value = "";
     return alert("編集モードにしてください");
+  }
+
+  if(!currentId) {
+    e.target.value = "";
+    return alert("先に業務を選んでください");
   }
 
   const file = e.target.files[0];
   if(!file) return;
 
-  if(file.size > 800 * 1024){
-    alert("画像が大きいです。まずは800KB以下推奨です。");
+  if(!storage){
     e.target.value = "";
-    return;
+    return alert("Storage未接続です。Firebase Storageを作成してください。");
   }
 
-  const reader = new FileReader();
-  reader.onload = function(ev){
-    document.execCommand("insertHTML", false, '<img src="' + ev.target.result + '" alt="画像">');
+  setStatus(saveStatus,(type === "video" ? "動画" : "画像") + "をアップロード中...","warn");
+
+  try{
+    const safeName = file.name.replace(/[^\w.\-ぁ-んァ-ン一-龥]/g, "_");
+    const path = "manualMedia/" + currentId + "/" + Date.now() + "_" + safeName;
+    const ref = storage.ref().child(path);
+
+    await ref.put(file);
+    const url = await ref.getDownloadURL();
+
+    if(type === "video"){
+      document.execCommand("insertHTML", false, '<video src="' + url + '" controls></video>');
+    }else{
+      document.execCommand("insertHTML", false, '<img src="' + url + '" alt="画像">');
+    }
+
     editor.focus();
-  };
-  reader.readAsDataURL(file);
-  e.target.value = "";
-}
-
-async function addWork(){
-  const pass = prompt("業務追加用パスワード");
-  if(pass !== PASSWORD) return alert("パスワードが違います");
-
-  const input = document.getElementById("newWorkName");
-  const name = input.value.trim();
-  if(!name) return;
-
-  const id = "work_" + Date.now();
-  const newWork = {
-    id: id,
-    title: name,
-    html: "<h2>" + escapeHtml(name) + "</h2><p>ここに内容を作成してください。</p>"
-  };
-
-  extraWorks.push(newWork);
-  renderExtraWorks();
-  input.value = "";
-
-  if(!db){
-    errorBox.innerText = "Firebase未接続なので追加内容は保存されません。";
-    return;
+    setStatus(saveStatus,(type === "video" ? "動画" : "画像") + "を追加しました。最後に保存ボタンを押してください。","ok");
+  }catch(err){
+    console.error(err);
+    setStatus(saveStatus,"アップロード失敗：" + (err.message || "Storageルール確認"),"ng");
+  }finally{
+    e.target.value = "";
   }
-
-  try {
-    await db.collection("settings").doc("extraWorks").set({
-      works: extraWorks,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    await db.collection("works").doc(id).set({
-      title: newWork.title,
-      html: newWork.html,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    statusBox.innerText = "業務を追加しました";
-    errorBox.innerText = "";
-  } catch(e) {
-    console.error(e);
-    errorBox.innerText = "業務追加に失敗しました";
-  }
-}
-
-async function loadExtraWorks(){
-  if(!db) return;
-
-  try {
-    const snap = await db.collection("settings").doc("extraWorks").get();
-    extraWorks = snap.exists ? (snap.data().works || []) : [];
-    renderExtraWorks();
-  } catch(e) {
-    console.error(e);
-  }
-}
-
-function renderExtraWorks(){
-  const area = document.getElementById("extraWorks");
-  area.innerHTML = "";
-  extraWorks.forEach(function(work){
-    const btn = document.createElement("button");
-    btn.className = "primary";
-    btn.textContent = work.title;
-    btn.onclick = function(){ openWork(work.id); };
-    area.appendChild(btn);
-  });
 }
 
 function escapeHtml(str){
   return String(str).replace(/[&<>"']/g, function(s){
-    return {
-      "&":"&amp;",
-      "<":"&lt;",
-      ">":"&gt;",
-      '"':"&quot;",
-      "'":"&#039;"
-    }[s];
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[s];
   });
 }
 </script>
