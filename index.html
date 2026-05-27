@@ -215,7 +215,7 @@ input[type="text"]:focus{border-color:var(--brand);box-shadow:0 0 0 4px rgba(37,
 input[type="color"]{width:42px;height:34px;border:0;background:transparent;vertical-align:middle}
 .editor{
   border:1px solid var(--line);
-  min-height:480px;
+  min-height:560px;
   padding:20px;
   border-radius:20px;
   background:#fbfdff;
@@ -251,6 +251,44 @@ input[type="color"]{width:42px;height:34px;border:0;background:transparent;verti
   .editor-head{flex-direction:column}
   .actions{grid-template-columns:1fr}
 }
+
+/* 保存情報をコンパクトにして本編を見やすく */
+.save-compact{
+  margin-top:12px;
+  padding:12px;
+  border-radius:18px;
+  background:#f8fafc;
+  border:1px solid var(--line);
+  box-shadow:none;
+}
+.save-compact h3{
+  margin:0 0 8px;
+  color:var(--muted);
+  font-size:13px;
+}
+.save-row{
+  display:grid;
+  grid-template-columns:1fr 150px;
+  gap:10px;
+  align-items:center;
+}
+.save-compact input{
+  font-size:14px;
+  padding:10px 12px;
+}
+.save-compact .btn{
+  padding:10px 12px;
+  font-size:14px;
+}
+.save-compact .status{
+  margin-top:8px;
+  padding:8px 10px;
+  font-size:12px;
+}
+@media(max-width:860px){
+  .save-row{grid-template-columns:1fr}
+}
+
 </style>
 </head>
 
@@ -285,7 +323,7 @@ input[type="color"]{width:42px;height:34px;border:0;background:transparent;verti
       <div class="card">
         <h3>業務を追加</h3>
         <div class="add-box">
-          <input id="newWorkName" type="text" placeholder="例：朝礼準備">
+          <input id="newWorkName" type="text" placeholder="業務名">
           <button class="btn primary" onclick="addWork()">＋ 業務を追加</button>
         </div>
       </div>
@@ -339,10 +377,12 @@ input[type="color"]{width:42px;height:34px;border:0;background:transparent;verti
         </div>
       </div>
 
-      <div class="card" style="box-shadow:none;background:#f8fafc;margin-top:14px;">
+      <div class="save-compact">
         <h3>保存情報</h3>
-        <input id="editorNameInput" type="text" placeholder="更新者名 任意 例：小田嶋">
-        <button class="btn green" onclick="saveWork()">保存する</button>
+        <div class="save-row">
+          <input id="editorNameInput" type="text" placeholder="更新者名">
+          <button class="btn green" onclick="saveWork()">保存する</button>
+        </div>
         <div id="saveStatus" class="status warn">保存状態：まだ保存していません</div>
       </div>
     </section>
